@@ -25,3 +25,35 @@ router.post('/register', (req, res, next) => {
             })
         }).catch(next)
 })
+
+
+
+
+
+//login
+router.post('/login', (req, res, next) => {
+    User.findOne({ email: req.body.email })
+        .then((user) => {
+            if (!user) return res.status(400).json({ error: 'user is not registered' })
+            bcrypt.compare(req.body.password, user.password, (err, success) => {
+                if (err) return res.status(500).json({ error: err.message })
+                if (!success) return res.status(400).json({ error: 'password does not match' })
+                const payload = {
+                    id: user.id,
+                    fName: user.fName,
+                    lName: user.lName,
+                    email: user.email,
+                    role: user.role
+                }
+                // console.log(payload)
+                jwt.sign(payload,
+                    process.env.SECRET,
+                    { expiresIn: '20d' },
+                    (err, token) => {
+                        if (err) return res.status(500).json({ error: err.message })
+                        res.json({ status: 'login successfully', token: token })
+                    })
+            })
+        }).catch(next)
+
+})
