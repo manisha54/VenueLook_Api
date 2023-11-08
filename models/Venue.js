@@ -32,3 +32,70 @@ reviewScheme.set('toJSON', {
     }
 
 })
+
+const venueScheme = new mongoose.Schema({
+    venueName: {
+        type: String,
+        required: true
+    },
+    picture: {
+        type: String
+    },
+    established: {
+        type: String,
+        required: true
+    },
+    location: {
+        type: String,
+        require: true
+    },
+    advancePayment: {
+        type: String,
+        required: true
+    },
+    spacePreference: {
+        type: String,
+        required: true
+    },
+    venueType: {
+        type: String,
+        required: true
+    },
+    contactNumber: {
+        type: String,
+        required: true
+    },
+    perPlate: {
+        type: String,
+        required: true
+    },
+    venueHallCapacity: {
+        type: String,
+        required: true
+    },
+    reviews: [reviewScheme],
+    photo: {
+        type: String
+    }
+
+
+
+}, { timestamps: true })
+
+
+
+
+//remove unnessary thing
+venueScheme.set('toJSON', {
+    transform: (document, returnedDocument) => {
+        returnedDocument.id = document._id.toString()
+        delete returnedDocument._id
+        delete returnedDocument.__v
+
+    }
+})
+
+
+
+
+module.exports = mongoose.model('Venue', venueScheme)
