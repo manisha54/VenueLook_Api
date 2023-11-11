@@ -30,3 +30,46 @@ const getUserById = (req, res, next) => {
         })
         .catch(next)
 }
+
+
+
+
+const updateUserById = (req, res, next) => {
+    User.findByIdAndUpdate(
+        req.user.id,
+        { $set: req.body },
+        { new: true }
+    )
+        .then(updated => {
+            if (!updated) {
+                return res.status(404).json({ error: "User not found." });
+            }
+            return res.json({ message: "Profile updated successfully.", data: updated });
+        })
+        .catch(next);
+}
+
+
+// const deleteUserById = (req, res, next) => {
+//     User.findByIdAndDelete(req.params.user_id)
+//         .then(reply => res.status(204).end())
+//         .catch(next)
+// }
+
+const deleteUserById = (req, res, next) => {
+    User.findByIdAndDelete(req.user.id)
+        .then(() => res.status(204).end())
+        .catch(next);
+}
+
+
+
+module.exports = {
+    getAllUsers,
+    deleteAllUsers,
+    getUserById,
+    updateUserById,
+    deleteUserById,
+
+
+}
