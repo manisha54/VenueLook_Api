@@ -69,3 +69,22 @@ const deleteVenueById = (req, res, next) => {
         .then(reply => res.status(204).end())
         .catch(next)
 }
+
+
+
+const uploadImage = (req, res, next) => {
+
+    // console.log(req.user)
+    res.json(req.file)
+
+}
+module.exports = {
+    getAllVenues,
+    createVenue,
+    deleteAllvenues,
+    getVenueById,
+    updateVenueById,
+    deleteVenueById,
+    // addtofavourites,
+    uploadImage
+}
