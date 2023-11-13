@@ -44,3 +44,39 @@ const createBookingVenue = (req, res) => {
     })
     .catch(err => res.json({ error: err.message }))
 }
+
+
+const getBookingVenueById = (req, res) => {
+    const bookingId = req.params.booking_id;
+
+    // Assuming you have a Booking model that represents bookings in your database
+    Booking.findById(bookingId)
+        .then(booking => {
+            if (!booking) {
+                return res.status(404).json({ error: "Booking not found" });
+            }
+            res.json({
+                success: true,
+                data: [booking]
+            });
+        })
+        .catch(err => res.status(500).json({ error: err.message }));
+}
+
+
+const updateBookingVenueById = (req, res) => {
+    const bookingId = req.params.booking_id;
+
+    // Assuming you have a Booking model that represents bookings in your database
+    Booking.findByIdAndUpdate(bookingId, req.body, { new: true })
+        .then(updatedBooking => {
+            if (!updatedBooking) {
+                return res.status(404).json({ error: "Booking not found" });
+            }
+            res.json({
+                success: true,
+                data: [updatedBooking]
+            });
+        })
+        .catch(err => res.status(500).json({ error: err.message }));
+}
