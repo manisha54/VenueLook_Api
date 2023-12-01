@@ -57,3 +57,43 @@ router.post('/login', (req, res, next) => {
         }).catch(next)
 
 })
+
+
+
+
+
+
+router.route('/')
+    .get(userController.getAllUsers)
+    .delete((req, res, next) => {
+        // Add the logic to delete all users here
+        User.deleteMany({})
+            .then(() => {
+                res.status(200).json({ message: 'All users deleted successfully.' });
+            })
+            .catch(next);
+    })
+    // .post((req, res) => {
+    //     res.status(405).json({ error: 'POST request is not allowed' })
+    // })
+    // .put((req, res) => {
+    //     res.status(405).json({ error: "PUT request is not allowed" })
+    // })
+
+
+
+router.route('/userinfo')
+    .get(verifyUser, userController.getUserById)
+    // .post((req, res) => {
+    //     res.status(405).json({ error: 'POST request is not allowed' })
+    // })
+    .put(verifyUser, userController.updateUserById)
+    .delete(verifyUser, userController.deleteUserById)
+
+
+
+
+
+
+
+module.exports = router
