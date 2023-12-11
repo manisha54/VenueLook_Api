@@ -4,40 +4,152 @@ const jwt = require('jsonwebtoken')
 const router = express.Router()
 const User = require('../models/User')
 const { verifyUser, verifyOwner } = require('../middleware/auth')
-
 const userController = require('../controllers/user_controller')
 
 
 
-//register
 router.post('/register', (req, res, next) => {
-    const { fName, lName, email, phoneNumber, password, role } = req.body
+    const { fName, lName, email, phoneNumber, password, role } = req.body;
+
+    // Check if all fields are empty
+    if (!fName && !lName && !email && !phoneNumber && !password) {
+        return res.status(400).json({
+            error: 'All fields are required.'
+        });
+    }
+
+    // Check for individual empty fields
+    if (!fName) {
+        return res.status(400).json({
+            error: 'First Name is required.'
+        });
+    }
+    if (!lName) {
+        return res.status(400).json({
+            error: 'Last Name is required.'
+        });
+    }
+    if (!email) {
+        return res.status(400).json({
+            error: 'Email is required.'
+        });
+    }
+    if (!phoneNumber) {
+        return res.status(400).json({
+            error: 'Phone Number is required.'
+        });
+    }
+    if (!password) {
+        return res.status(400).json({
+            error: 'Password is required.'
+        });
+    }
+    
+
+    // Regular expressions for password criteria
+    const passwordRegex = {
+        uppercase: /[A-Z]/,
+        lowercase: /[a-z]/,
+        numbers: /[0-9]/,
+        specialChars: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/
+    };
+
+    // Check if the password meets the required criteria
+    if (
+        !passwordRegex.uppercase.test(password) ||
+        !passwordRegex.lowercase.test(password) ||
+        !passwordRegex.numbers.test(password) ||
+        !passwordRegex.specialChars.test(password)
+    ) {
+        return res.status(400).json({
+            error: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
+        });
+    }
+
+    // Check for minimum password length
+    const minPasswordLength = 8;
+    if (password.length < minPasswordLength) {
+        return res.status(400).json({
+            error: `Password must be at least ${minPasswordLength} characters long.`
+        });
+    }
+
+    // Check for other criteria as needed...
+
     User.findOne({ email: req.body.email })
         .then((user) => {
-            // res.json(user)
-            if (user) return res.status(400).json({ error: 'user already exist' })
+            if (user) return res.status(400).json({ error: 'User already exists.' });
+
             bcrypt.hash(password, 10, (err, hash) => {
-                if (err) return res.status(500).json({ error: err.message })
+                if (err) return res.status(500).json({ error: err.message });
+
                 User.create({ fName, lName, email, phoneNumber, role, password: hash })
                     .then((user) => {
-                        res.status(201).json(user)
-                    }).catch(next)
-            })
-        }).catch(next)
-})
-
+                        res.status(201).json(user);
+                    })
+                    .catch(next);
+            });
+        })
+        .catch(next);
+});
 
 
 
 
 //login
+
+const maxFailedAttempts = 5; // Define the maximum number of allowed failed login attempts
+
 router.post('/login', (req, res, next) => {
+    const { email, password } = req.body;
+
+    // Check if all fields are empty
+    if (!email && !password) {
+        return res.status(400).json({
+            error: 'Email and password are required.'
+        });
+    }
+
+    // Check for individual empty fields
+    if (!email) {
+        return res.status(400).json({
+            error: 'Email is required.'
+        });
+    }
+    if (!password) {
+        return res.status(400).json({
+            error: 'Password is required.'
+        });
+    }
+
     User.findOne({ email: req.body.email })
         .then((user) => {
-            if (!user) return res.status(400).json({ error: 'user is not registered' })
+            if (!user) return res.status(400).json({ error: 'User is not registered' })
+
+            if (user.isLocked) {
+                return res.status(401).json({ error: 'Account locked. Please contact support.' });
+            }
+
             bcrypt.compare(req.body.password, user.password, (err, success) => {
                 if (err) return res.status(500).json({ error: err.message })
-                if (!success) return res.status(400).json({ error: 'password does not match' })
+
+                if (!success) {
+                    user.failedLoginAttempts += 1; // Increment failed login attempts
+                    user.save(); // Save the updated user document
+
+                    if (user.failedLoginAttempts >= maxFailedAttempts) {
+                        user.isLocked = true; // Lock the account
+                        user.save();
+                        return res.status(401).json({ error: 'Account locked due to multiple failed login attempts.' });
+                    }
+
+                    return res.status(400).json({ error: 'Incorrect password' });
+                }
+
+                // Reset failed login attempts on successful login
+                user.failedLoginAttempts = 0;
+                user.save();
+
                 const payload = {
                     id: user.id,
                     fName: user.fName,
@@ -45,20 +157,18 @@ router.post('/login', (req, res, next) => {
                     email: user.email,
                     role: user.role
                 }
-                // console.log(payload)
+
+                // Generate JWT for authenticated user
                 jwt.sign(payload,
                     process.env.SECRET,
                     { expiresIn: '20d' },
                     (err, token) => {
                         if (err) return res.status(500).json({ error: err.message })
-                        res.json({ status: 'login successfully', token: token })
+                        res.json({ status: 'Login successful', token: token })
                     })
             })
         }).catch(next)
-
 })
-
-
 
 
 
@@ -73,12 +183,12 @@ router.route('/')
             })
             .catch(next);
     })
-    // .post((req, res) => {
-    //     res.status(405).json({ error: 'POST request is not allowed' })
-    // })
-    // .put((req, res) => {
-    //     res.status(405).json({ error: "PUT request is not allowed" })
-    // })
+// .post((req, res) => {
+//     res.status(405).json({ error: 'POST request is not allowed' })
+// })
+// .put((req, res) => {
+//     res.status(405).json({ error: "PUT request is not allowed" })
+// })
 
 
 
