@@ -8,6 +8,45 @@ const userController = require('../controllers/user_controller')
 
 
 
+// Common passwords list
+const commonPasswords = ['password', '123456', 'manisha','password12345', /* Add more common passwords here... */];
+
+function isSimilarPassword(userPassword) {
+    const threshold = 3; // Example threshold for similarity
+
+    for (const commonPassword of commonPasswords) {
+        const distance = calculateLevenshteinDistance(userPassword.toLowerCase(), commonPassword.toLowerCase());
+        if (distance <= threshold) {
+            return true; // Password is considered too similar
+        }
+    }
+    return false; // Password is not too similar
+}
+
+// Function to calculate Levenshtein Distance between two strings
+function calculateLevenshteinDistance(str1, str2) {
+    const m = str1.length;
+    const n = str2.length;
+    const dp = [];
+
+    for (let i = 0; i <= m; i++) {
+        dp[i] = [];
+        for (let j = 0; j <= n; j++) {
+            if (i === 0) {
+                dp[i][j] = j;
+            } else if (j === 0) {
+                dp[i][j] = i;
+            } else if (str1[i - 1] === str2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+            }
+        }
+    }
+
+    return dp[m][n];
+}
+
 router.post('/register', (req, res, next) => {
     const { fName, lName, email, phoneNumber, password, role } = req.body;
 
@@ -44,8 +83,9 @@ router.post('/register', (req, res, next) => {
             error: 'Password is required.'
         });
     }
-    
 
+
+   
     // Regular expressions for password criteria
     const passwordRegex = {
         uppercase: /[A-Z]/,
@@ -74,8 +114,18 @@ router.post('/register', (req, res, next) => {
         });
     }
 
+    // Check if the password is too similar to common passwords
+    if (isSimilarPassword(password)) {
+        return res.status(400).json({
+            error: 'Password is too similar to common passwords. Please choose a stronger password.'
+        });
+    }
     // Check for other criteria as needed...
 
+
+
+
+    
     User.findOne({ email: req.body.email })
         .then((user) => {
             if (user) return res.status(400).json({ error: 'User already exists.' });
@@ -92,6 +142,10 @@ router.post('/register', (req, res, next) => {
         })
         .catch(next);
 });
+
+
+
+
 
 
 

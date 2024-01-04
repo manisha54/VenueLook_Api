@@ -11,17 +11,20 @@ const Booking = require('../models/Booking')
 //booking
 router.route('/')
     .get(verifyOwner, bookingVenueController.getAllBookingVenue)
-    // .put((req, res) => {
-    //     res.status(405).json({ error: "PUT request is not allowed" })
-    // })
-    // .delete((req, res) => {
-    //     res.status(405).json({ error: "DELETE request is not allowed" })
-    // })
-    // .post((req, res) => {
-    //     res.status(405).json({ error: "POST request is not allowed" })
-    // })
+// .put((req, res) => {
+//     res.status(405).json({ error: "PUT request is not allowed" })
+// })
+// .delete((req, res) => {
+//     res.status(405).json({ error: "DELETE request is not allowed" })
+// })
+// .post((req, res) => {
+//     res.status(405).json({ error: "POST request is not allowed" })
+// })
 
 router.route('/:venue_id')
+
+    //only registered user can book venue, when guest user try too book veneue, 
+    // they redirected to login or registered page
     .post(verifyUser, bookingVenueController.createBookingVenue)
 
 // only by users

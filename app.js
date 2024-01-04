@@ -14,13 +14,13 @@ const User = require('./models/User')
 
 
 const MONGODB_URL = process.env.NODE_ENV === 'test'
-        ?process.env.TEST_DB_URL
-        : process.env.DB_URL
+  ? process.env.TEST_DB_URL
+  : process.env.DB_URL
 
 
 
 mongoose.connect(MONGODB_URL)
-  .then(()=>{
+  .then(() => {
     console.log(`connected to the ${MONGODB_URL} server`)
   })
   .catch((err) => console.log(err))
@@ -30,7 +30,7 @@ mongoose.connect(MONGODB_URL)
 const app = express()
 app.use(express.json())
 app.use(cors())
-app.use(express.static('public'))  
+app.use(express.static('public'))
 app.use(morgan('tiny'))
 
 app.get('/', (req, res) => {
@@ -42,19 +42,75 @@ app.use('/users', user_routes)
 app.use('/bookings', verifyUser, booking_routes)
 app.use('/venues', verifyUser, venue_routes)
 //app.post('/upload/:venue_id', upload.single('photo'), (req, res, next) => {
-  
+
 
 // app.post('/upload/', upload.single('photo'), (req, res, next) => {
-  
+
 //   res.json({data: req.file.filename})
 
 // })
 
 
+
+
+// // Endpoint to check if user's password has expired
+// app.get('/check-password-expiration', verifyToken, (req, res) => {
+//   const userId = req.user.id; // Assuming the authenticated user ID is extracted from the token
+//   const user = user.find(u => u.id === userId);
+
+//   if (!user) {
+//     return res.status(404).json({ message: 'User not found' });
+//   }
+//   const currentDate = new Date();
+//   const lastPasswordChangeDate = new Date(user.lastPasswordChange);
+//   const ninetyDays = 90 * 24 * 60 * 60 * 1000; // 90 days in milliseconds
+
+//   if (currentDate - lastPasswordChangeDate >= ninetyDays) {
+//     res.status(200).json({ message: 'Please update your password. Your password has expired.' });
+//   } else {
+//     res.status(200).json({ message: 'Your password is up to date.' });
+//   }
+// });
+
+
+
+
+
+
+// // Endpoint to change user's password
+// app.post('/change-password', verifyToken, async (req, res) => {
+//   const userId = req.user.id; 
+//   const { currentPassword, newPassword } = req.body; 
+
+//   const user = user.find(u => u.id === userId);
+
+//   if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//   }
+
+//   // Check if the current password matches the stored hashed password
+//   const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+//   if (!isPasswordValid) {
+//       return res.status(400).json({ message: 'Current password is incorrect' });
+//   }
+//   // Hash the new password
+//   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+//   user.password = hashedNewPassword;
+//   user.lastPasswordChange = new Date(); // Update last password change date
+
+//   res.status(200).json({ message: 'Password updated successfully' });
+// });
+
+
+
+
+
 app.post('/upload', upload.single('photo'), (req, res, next) => {
   console.log(req.file)
-  
-  res.json({data: req.file.filename})
+
+  res.json({ data: req.file.filename })
 
 })
 

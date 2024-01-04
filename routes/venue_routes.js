@@ -9,7 +9,7 @@ const { verifyOwner, verifyUser } = require('../middleware/auth')
 
 
 router.route('/')
-    .get(venueController.getAllVenues)
+    .get(venueController.getAllVenues) //both regeistered and guest user can view list of venues
     .post(verifyOwner, venueController.createVenue) //only owner can able to create venue
     // .put((req, res) => {
     //     res.status(405).json({ error: "PUT request is not allowed" })
@@ -34,7 +34,7 @@ router.route('/:venue_id')
 
 router.route('/:venue_id/reviews')
     .get(reviewController.getAllReview)
-    .post(verifyUser, reviewController.createReview)
+    .post(verifyUser, reviewController.createReview)    //only registered user can review on venue
     // .put((req, res) => {
     //     res.status(405).json({ error: "PUT request is not allowed" })
     // })
