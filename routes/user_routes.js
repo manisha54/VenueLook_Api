@@ -5,7 +5,36 @@ const router = express.Router()
 const User = require('../models/User')
 const { verifyUser, verifyOwner } = require('../middleware/auth')
 const userController = require('../controllers/user_controller')
+const fs = require('fs');
+const crypto = require('crypto');
 
+
+
+// // Encryption function
+// function encryptText(text, key) {
+//     const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), crypto.randomBytes(16));
+//     let encrypted = cipher.update(text, 'utf8', 'hex');
+//     encrypted += cipher.final('hex');
+//     return encrypted;
+// }
+
+// // Decryption function
+// function decryptText(encryptedText, key) {
+//     const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), crypto.randomBytes(16));
+//     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+//     decrypted += decipher.final('utf8');
+//     return decrypted;
+// }
+
+// // Define a function to log user actions
+// function logUserAction(userId, action) {
+//     const logEntry = `${new Date().toISOString()} - User ${userId} performed ${action}.\n`;
+//     fs.appendFile('audit.log', logEntry, (err) => {
+//         if (err) {
+//             console.error('Error writing to audit log:', err);
+//         }
+//     });
+// }
 
 
 // Common passwords list
@@ -122,10 +151,6 @@ router.post('/register', (req, res, next) => {
     }
     // Check for other criteria as needed...
 
-
-
-
-    
     User.findOne({ email: req.body.email })
         .then((user) => {
             if (user) return res.status(400).json({ error: 'User already exists.' });

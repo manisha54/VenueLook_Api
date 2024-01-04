@@ -107,14 +107,93 @@ app.use('/venues', verifyUser, venue_routes)
 
 
 
-app.post('/upload', upload.single('photo'), (req, res, next) => {
-  console.log(req.file)
-
-  res.json({ data: req.file.filename })
-
-})
 
 
+
+// // This object will store users and their generated tokens
+// const users = {};
+
+// // Endpoint for initiating 2FA
+// app.post('/sendToken', (req, res) => {
+//   const { email } = req.body;
+  
+//   // Generate a random 6-character token
+//   const token = randomstring.generate({
+//     length: 6,
+//     charset: 'numeric'
+//   });
+
+//   // Save the token with the associated email
+//   users[email] = token;
+
+//   // Email configuration
+//   const mailOptions = {
+//     from: 'noreply.thisisforaproject@email.com',
+//     to: email,
+//     text: `{token}$ is your login OTP code`
+//   };
+
+//   // Send the email
+//   transporter.sendMail(mailOptions, (error, info) => {
+//     if (error) {
+//       console.log(error);
+//       res.status(500).send('Error sending token');
+//     } else {
+//       console.log('Email sent: ' + info.response);
+//       res.status(200).send('Token sent successfully');
+//     }
+//   });
+// });
+
+// // Endpoint for verifying the token
+// app.post('/verifyToken', (req, res) => {
+//   const { email, token } = req.body;
+
+//   // Check if the token matches the one associated with the email
+//   if (users[email] === token) {
+//     res.status(200).send('Token verified successfully');
+//     // Optionally, you might clear the token after successful verification
+//     delete users[email];
+//   } else {
+//     res.status(400).send('Invalid token');
+//   }
+// });
+
+
+// app.post('/upload', upload.single('photo'), (req, res, next) => {
+//   console.log(req.file)
+
+//   res.json({ data: req.file.filename })
+
+// })
+
+
+
+
+
+
+
+
+
+
+
+// function changePassword(userId, newPassword) {
+//   const previousPasswords = getPreviousPasswords(userId); // Retrieve previous passwords for the user
+//   const passwordHistoryLimit = 5; // Number of previous passwords to check against
+
+//   if (previousPasswords.includes(newPassword)) {
+//       throw new Error('Cannot reuse old passwords.');
+//   }
+
+//   if (previousPasswords.length >= passwordHistoryLimit) {
+//       previousPasswords.pop(); // Remove the oldest password from history
+//   }
+
+//   previousPasswords.unshift(hash(newPassword)); // Add the new password to the history
+//   savePasswordHistory(userId, previousPasswords); // Save updated password history
+
+//   saveNewPassword(userId, hash(newPassword)); // Save the new password
+// }
 
 
 //error handling middleware
